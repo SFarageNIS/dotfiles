@@ -133,8 +133,17 @@ function update_all {
 
 ## Make backup file
 function backup_file {
+  if [ -z "$1" ]; then
+    echo "Usage: backup_file <file_path> [<true|false for dated backup>]"
+    echo "Example: backup_file /etc/chef/client.pem true"
+    echo "       : -> /etc/chef/client.pem.bak-20220628165003"
+    echo "Example: backup_file /etc/chef/client.pem false"
+    echo "       : -> /etc/chef/client.pem.bak"
+    return 1
+  fi
+
   if test -f "$1"; then
-    sudo cp -vi "$1"{,.bak}
+    sudo cp -vip "$1"{,.bak$($2 && echo "-$(date +%Y%m%d%H%M%S)")}
   else
     echo "$1 doesn't exist or isn't a file"
   fi
@@ -145,6 +154,28 @@ alias ff='firefox -ProfileManager -no-remote &'
 
 # un tar tar.gz
 alias untar="tar -xzvf"
+
+# extract:  Extract most know archives with one command
+extract () {
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xjf $1     ;;
+            *.tar.gz)    tar xzf $1     ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar e $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xzvf $1    ;;
+            *.tbz2)      tar xjf $1     ;;
+            *.tgz)       tar xzvf $1    ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)     echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
 
 # directory navigation
 alias ..="cd .."
